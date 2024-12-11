@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2024 at 04:50 PM
+-- Generation Time: Dec 12, 2024 at 12:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,9 +39,6 @@ CREATE TABLE `instructors` (
 -- Dumping data for table `instructors`
 --
 
-INSERT INTO `instructors` (`id`, `name`, `email`, `password`, `date_created`) VALUES
-(1, 'jopsua', 'opopop@gmail.com', '$2y$10$2MEnHeA83I1QRgROXSWxb.LDvkcRY0rVYlE1NzIWQ8yvY.hNzqK/i', '2024-12-11 14:29:47');
-
 -- --------------------------------------------------------
 
 --
@@ -64,10 +61,6 @@ CREATE TABLE `questions` (
 -- Dumping data for table `questions`
 --
 
-INSERT INTO `questions` (`id`, `quiz_id`, `question`, `type`, `option1`, `option2`, `option3`, `option4`, `answer`) VALUES
-(1, 1, 'sadsads', 'MCQ', 'e', 'ew', 'ew', 'wew', 'we'),
-(2, 1, 'weqw', 'True/False', NULL, NULL, NULL, NULL, 'False'),
-(3, 1, 'wqewq', 'Fill-in-the-Blank', NULL, NULL, NULL, NULL, 'wqewqe');
 
 -- --------------------------------------------------------
 
@@ -85,8 +78,41 @@ CREATE TABLE `quizzes` (
 -- Dumping data for table `quizzes`
 --
 
-INSERT INTO `quizzes` (`id`, `program`, `description`) VALUES
-(1, 'TEP', 'sdasdsacs');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quiz_answers`
+--
+
+CREATE TABLE `quiz_answers` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) DEFAULT NULL,
+  `quiz_id` int(11) DEFAULT NULL,
+  `answer` text DEFAULT NULL,
+  `score` int(11) DEFAULT NULL,
+  `date_taken` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quiz_results`
+--
+
+CREATE TABLE `quiz_results` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `quiz_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `answer` text NOT NULL,
+  `is_correct` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quiz_results`
+--
+
 
 -- --------------------------------------------------------
 
@@ -106,10 +132,6 @@ CREATE TABLE `students` (
 --
 -- Dumping data for table `students`
 --
-
-INSERT INTO `students` (`id`, `name`, `email`, `password`, `date_created`, `course`) VALUES
-(1, 'joshua', 'opop@nbsc.edu.ph', '$2y$10$0OSHGk6Fuohvh76FDVBwXeHL9ZzThsS/EF49trPG.jkOikgJBkm3e', '2024-12-11 14:09:25', 'CRIM'),
-(2, 'Auguis,Queennie Dela Cruz', 'opopop@nbsc.edu.ph', '$2y$10$N9beHDqc/ILX50O6Su9Guul0X7kQaL/ILSfPEcznQLkGEayFKXVCe', '2024-12-11 15:25:29', 'BSIT');
 
 --
 -- Indexes for dumped tables
@@ -136,6 +158,20 @@ ALTER TABLE `quizzes`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `quiz_answers`
+--
+ALTER TABLE `quiz_answers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `quiz_id` (`quiz_id`);
+
+--
+-- Indexes for table `quiz_results`
+--
+ALTER TABLE `quiz_results`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
@@ -156,13 +192,25 @@ ALTER TABLE `instructors`
 -- AUTO_INCREMENT for table `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `quiz_answers`
+--
+ALTER TABLE `quiz_answers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `quiz_results`
+--
+ALTER TABLE `quiz_results`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `students`
@@ -179,6 +227,13 @@ ALTER TABLE `students`
 --
 ALTER TABLE `questions`
   ADD CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`);
+
+--
+-- Constraints for table `quiz_answers`
+--
+ALTER TABLE `quiz_answers`
+  ADD CONSTRAINT `quiz_answers_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
+  ADD CONSTRAINT `quiz_answers_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
