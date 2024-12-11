@@ -11,9 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['name'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $course = $_POST['course'] ?? null; // Only for student
-
-    // Check if the email already exists
+    $course = $_POST['course'] ?? null; 
     if ($role == 'student') {
         $stmt = $pdo->prepare("SELECT * FROM students WHERE email = ?");
     } else {
@@ -22,12 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute([$email]);
 
     if ($stmt->rowCount() > 0) {
-        // User already exists, redirect to index.php
+       
         echo "Email already registered. <a href='index.php'>Login here</a>";
-        exit; // Stop further execution
+        exit; 
     }
 
-    // Insert new user into the database
     if ($role == 'student') {
         $stmt = $pdo->prepare("INSERT INTO students (name, email, password, course) VALUES (?, ?, ?, ?)");
         $stmt->execute([$name, $email, $password, $course]);
@@ -36,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$name, $email, $password]);
     }
 
-    // Redirect to index.php after successful registration
     header('Location: index.php');
     exit;
 }
@@ -61,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .main-title {
             text-align: center;
-            margin-bottom: 30px; /* Add some margin to the top */
+            margin-bottom: 30px; 
         }
 
         .main-title h1 {

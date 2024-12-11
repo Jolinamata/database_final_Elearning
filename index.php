@@ -118,7 +118,7 @@
 <div class="container">
         <div class="login-container">
             <h2>Login as Student</h2>
-            <form action="studentdashboard.php" method="post">
+            <form action="studentlogin.php" method="post">
                 <input type="email" name="email" placeholder="Enter your email" required>
                 <input type="password" name="password" placeholder="Enter your password" required>
                 <button type="submit">Login</button>

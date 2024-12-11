@@ -2,13 +2,12 @@
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'student') {
-    header('Location: login.php');
+    header('Location: studentdashboard.php');
     exit();
 }
 
 include('db_connection.php');
 
-// Fetch the student's name and course
 $stmt = $pdo->prepare("SELECT name, course FROM students WHERE id = :id");
 $stmt->bindParam(':id', $_SESSION['user_id']);
 $stmt->execute();
@@ -16,10 +15,9 @@ $student = $stmt->fetch(PDO::FETCH_ASSOC);
 $student_name = $student['name'];
 $student_course = $student['course'];
 
-// Fetch questions for the student (you can adjust the query based on quiz_id or any other condition)
-$stmt = $pdo->prepare("SELECT * FROM questions");
+$stmt = $pdo->prepare("SELECT * FROM quizzes");
 $stmt->execute();
-$questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$quizzes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -29,17 +27,18 @@ $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <style>
+       
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f7f7f7;
+            background-color: #f0f2f5;
             color: #333;
             margin: 0;
             padding: 0;
         }
 
         nav {
-            background-color: #4CAF50;
-            padding: 15px 0;
+            background-color: #333;
+            padding: 15px;
         }
 
         .nav-container {
@@ -48,10 +47,9 @@ $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
         }
 
-        .nav-title h1 {
+        .nav-title {
             color: white;
             font-size: 24px;
             margin: 0;
@@ -59,54 +57,92 @@ $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         .nav-links a {
             color: white;
-            margin: 0 15px;
+            margin: 0 10px;
             text-decoration: none;
-            font-size: 18px;
-            transition: color 0.3s ease;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
         }
 
         .nav-links a:hover {
-            color: #ffeb3b;
+            background-color: #4caf50;
         }
 
         .dashboard-content {
             max-width: 1200px;
-            margin: 30px auto;
+            margin: 40px auto;
             padding: 20px;
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .question-container {
+        .quiz-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             margin-top: 20px;
         }
 
-        .question {
-            background-color: #f1f1f1;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
+        .quiz {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .question h3 {
+        .quiz:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .quiz h3 {
+            font-size: 20px;
             margin: 0;
-            font-size: 18px;
         }
 
-        .options {
+        .quiz p {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .quiz button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .take-quiz-button {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .take-quiz-button:hover {
+            background-color: #45a049;
+        }
+
+        .done-button {
+            background-color: #bbb;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .score {
             margin-top: 10px;
+            font-size: 14px;
+            color: #333;
         }
-
-        .options p {
-            margin: 5px 0;
-        }
-
     </style>
 </head>
 <body>
 
-<!-- Navigation Bar -->
 <nav>
     <div class="nav-container">
         <div class="nav-title">
@@ -118,28 +154,37 @@ $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </nav>
 
-<!-- Student Dashboard Content -->
 <div class="dashboard-content">
-    <h2>You're enrolled in the <?php echo htmlspecialchars($student_course); ?> course.</h2>
+  
 
-    <!-- Display Questions -->
-    <div class="question-container">
-        <h3>Questions for your quiz:</h3>
-        <?php foreach ($questions as $question): ?>
-            <div class="question">
-                <h3>Question: <?php echo htmlspecialchars($question['question']); ?></h3>
-                <div class="options">
-                    <?php if ($question['type'] === 'MCQ'): ?>
-                        <p><strong>Option 1:</strong> <?php echo htmlspecialchars($question['option1']); ?></p>
-                        <p><strong>Option 2:</strong> <?php echo htmlspecialchars($question['option2']); ?></p>
-                        <p><strong>Option 3:</strong> <?php echo htmlspecialchars($question['option3']); ?></p>
-                        <p><strong>Option 4:</strong> <?php echo htmlspecialchars($question['option4']); ?></p>
-                    <?php elseif ($question['type'] === 'True/False'): ?>
-                        <p><strong>Answer:</strong> <?php echo htmlspecialchars($question['answer']); ?></p>
-                    <?php elseif ($question['type'] === 'Fill-in-the-Blank'): ?>
-                        <p><strong>Answer:</strong> <?php echo htmlspecialchars($question['answer']); ?></p>
-                    <?php endif; ?>
-                </div>
+    <div class="quiz-container">
+        <h3>Available Quizzes:</h3>
+        <?php foreach ($quizzes as $quiz): ?>
+            <?php
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as count, SUM(is_correct) as total_score 
+                FROM quiz_results 
+                WHERE user_id = :user_id AND quiz_id = :quiz_id
+            ");
+            $stmt->bindParam(':user_id', $_SESSION['user_id']);
+            $stmt->bindParam(':quiz_id', $quiz['id']);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $is_taken = $result['count'] > 0;
+            $total_score = $result['total_score'] ?? 0;
+            ?>
+            <div class="quiz">
+                <h3><?php echo htmlspecialchars($quiz['program']); ?></h3>
+                <p><?php echo htmlspecialchars($quiz['description']); ?></p>
+                <?php if ($is_taken): ?>
+                    <button class="done-button">Done</button>
+                    <p class="score">Total Points: <?php echo $total_score; ?></p>
+                <?php else: ?>
+                    <a href="take_quiz.php?quiz_id=<?php echo $quiz['id']; ?>">
+                        <button class="take-quiz-button">Take Quiz</button>
+                    </a>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>
